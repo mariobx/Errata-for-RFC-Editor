@@ -1,0 +1,759 @@
+<?xml version="1.0"?>
+<!-- CPSA 4.4.9 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>ODETTE-FTP-v2-Secure-Authentication Protocol Verification Suite</title>
+ <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+ <style>
+  svg.diagram { border-width: 1px; border-style: solid }
+ </style>
+</head>
+<body>
+
+<pre>(herald
+  &quot;ODETTE-FTP-v2-Secure-Authentication Protocol Verification Suite&quot;)
+(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;All input read from odette-ftp-v2-secure-authentication.scm&quot;)</pre>
+
+<p id="top">Trees: <a href="#t0">0</a> <a href="#t3">3</a>.</p>
+
+<p id="t0">Tree <a href="#top">0</a>, POV <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 154.920' font-size='12.000'>
+  <text
+   x='89.880' y='101.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k2&quot;, &quot;_self&quot;)'>2</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k1&quot;, &quot;_self&quot;)'>1</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='63.540' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k0&quot;, &quot;_self&quot;)'>0</text>
+  </svg></div>
+
+<pre>(defprotocol ODETTE-FTP-v2-Secure-Authentication basic
+  (defrole Initiator
+    (vars (handshake_channel chan)
+      (initiator_identification_code responder_identification_code name)
+      (challenge_for_initiator challenge_for_responder text))
+    (trace (send handshake_channel &quot;SECD&quot;)
+      (recv handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_initiator
+            (pubk initiator_identification_code))))
+      (send handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))
+      (recv handshake_channel &quot;SECD&quot;)
+      (send handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_responder
+            (pubk responder_identification_code))))
+      (recv handshake_channel (cat &quot;AURP&quot; challenge_for_responder)))
+    (non-orig (privk initiator_identification_code))
+    (uniq-orig challenge_for_responder)
+    (inputs handshake_channel initiator_identification_code
+      responder_identification_code
+      (privk initiator_identification_code)
+      (pubk responder_identification_code))
+    (comment
+      &quot;Initiator holds its own private key (non-orig) to decrypt AUCH; Responder public key is public.&quot;))
+  (defrole Responder
+    (vars (handshake_channel chan)
+      (initiator_identification_code responder_identification_code name)
+      (challenge_for_initiator challenge_for_responder text))
+    (trace (recv handshake_channel &quot;SECD&quot;)
+      (send handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_initiator
+            (pubk initiator_identification_code))))
+      (recv handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))
+      (send handshake_channel &quot;SECD&quot;)
+      (recv handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_responder
+            (pubk responder_identification_code))))
+      (send handshake_channel (cat &quot;AURP&quot; challenge_for_responder)))
+    (non-orig (privk responder_identification_code))
+    (uniq-orig challenge_for_initiator)
+    (inputs handshake_channel initiator_identification_code
+      responder_identification_code (pubk initiator_identification_code)
+      (privk responder_identification_code))
+    (comment
+      &quot;Responder holds its own private key (non-orig) to decrypt the Initiator&apos;s AUCH; the Responder&apos;s AUCH uses the Initiator&apos;s public key.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k0">Item <a href="#t0">0</a>, Children: <a href="#k1">1</a> <a href="#k2">2</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='529.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 529.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle style='fill: red;' cx='39.960' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle cx='39.960' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Initiator</text>
+   </g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 0</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars (challenge_for_initiator challenge_for_responder text)
+    (initiator_identification_code responder_identification_code name)
+    (handshake_channel chan))
+  (defstrand Initiator 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_responder)
+  (comment &quot;Initiator POV; listeners intentionally empty.&quot;)
+  (label 0)
+  (unrealized (0 5))
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_responder (0 4)))
+  (comment &quot;2 in cohort - 2 not yet seen&quot;))</pre>
+
+<p id="k1">Item <a href="#t0">1</a>, Parent: <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='529.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 529.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='339.960' x2='139.920' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 489.960 Q 92.940 489.960 45.960 489.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle cx='139.920' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle style='fill: blue;' cx='139.920' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle cx='139.920' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle style='fill: blue;' cx='39.960' cy='489.960' r='6.000'/></g>
+  <path
+   d='M 39.960 414.960 Q 86.940 414.960 133.920 414.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle cx='39.960' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_responder) (initiator_identification_code responder_identification_code) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460' style='text-anchor: middle;'>Initiator</text>
+   </g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Initiator</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 1</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars (challenge_for_initiator challenge_for_responder text)
+    (initiator_identification_code responder_identification_code name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand Initiator 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (defstrand Initiator 3
+    (challenge_for_initiator challenge_for_responder)
+    (initiator_identification_code responder_identification_code)
+    (handshake_channel handshake_channel-0))
+  (precedes ((0 4) (1 1)) ((1 2) (0 5)))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_responder)
+  (comment &quot;Initiator POV; listeners intentionally empty.&quot;)
+  (operation nonce-test (added-strand Initiator 3)
+    challenge_for_responder (0 5)
+    (enc challenge_for_responder (pubk responder_identification_code)))
+  (strand-map 0)
+  (label 1)
+  (parent 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_responder (0 4))))</pre>
+
+<p id="k2">Item <a href="#t0">2</a>, Parent: <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='529.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 529.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 489.960 Q 92.940 489.960 45.960 489.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle cx='139.920' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle style='fill: blue;' cx='139.920' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle cx='139.920' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_initiator-0))</title>
+   <circle style='fill: blue;' cx='139.920' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_initiator-0 (pubk initiator_identification_code-0))))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle style='fill: blue;' cx='39.960' cy='489.960' r='6.000'/></g>
+  <path
+   d='M 39.960 414.960 Q 86.940 414.960 133.920 414.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle cx='39.960' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator-0) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code-0) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460' style='text-anchor: middle;'>Responder</text>
+   </g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Initiator</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 2</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars
+    (challenge_for_initiator challenge_for_responder
+      challenge_for_initiator-0 text)
+    (initiator_identification_code responder_identification_code
+      initiator_identification_code-0 name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand Initiator 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (defstrand Responder 6
+    (challenge_for_initiator challenge_for_initiator-0)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code-0)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel-0))
+  (precedes ((0 4) (1 4)) ((1 5) (0 5)))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_responder challenge_for_initiator-0)
+  (comment &quot;Initiator POV; listeners intentionally empty.&quot;)
+  (operation nonce-test (added-strand Responder 6)
+    challenge_for_responder (0 5)
+    (enc challenge_for_responder (pubk responder_identification_code)))
+  (strand-map 0)
+  (label 2)
+  (parent 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_initiator-0 (1 1))
+    (challenge_for_responder (0 4))))</pre>
+
+<p id="t3">Tree <a href="#top">3</a>, POV <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 154.920' font-size='12.000'>
+  <text
+   x='89.880' y='101.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k5&quot;, &quot;_self&quot;)'>5</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k4&quot;, &quot;_self&quot;)'>4</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='63.540' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k3&quot;, &quot;_self&quot;)'>3</text>
+  </svg></div>
+
+<pre>(defprotocol ODETTE-FTP-v2-Secure-Authentication basic
+  (defrole Initiator
+    (vars (handshake_channel chan)
+      (initiator_identification_code responder_identification_code name)
+      (challenge_for_initiator challenge_for_responder text))
+    (trace (send handshake_channel &quot;SECD&quot;)
+      (recv handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_initiator
+            (pubk initiator_identification_code))))
+      (send handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))
+      (recv handshake_channel &quot;SECD&quot;)
+      (send handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_responder
+            (pubk responder_identification_code))))
+      (recv handshake_channel (cat &quot;AURP&quot; challenge_for_responder)))
+    (non-orig (privk initiator_identification_code))
+    (uniq-orig challenge_for_responder)
+    (inputs handshake_channel initiator_identification_code
+      responder_identification_code
+      (privk initiator_identification_code)
+      (pubk responder_identification_code))
+    (comment
+      &quot;Initiator holds its own private key (non-orig) to decrypt AUCH; Responder public key is public.&quot;))
+  (defrole Responder
+    (vars (handshake_channel chan)
+      (initiator_identification_code responder_identification_code name)
+      (challenge_for_initiator challenge_for_responder text))
+    (trace (recv handshake_channel &quot;SECD&quot;)
+      (send handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_initiator
+            (pubk initiator_identification_code))))
+      (recv handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))
+      (send handshake_channel &quot;SECD&quot;)
+      (recv handshake_channel
+        (cat &quot;AUCH&quot;
+          (enc challenge_for_responder
+            (pubk responder_identification_code))))
+      (send handshake_channel (cat &quot;AURP&quot; challenge_for_responder)))
+    (non-orig (privk responder_identification_code))
+    (uniq-orig challenge_for_initiator)
+    (inputs handshake_channel initiator_identification_code
+      responder_identification_code (pubk initiator_identification_code)
+      (privk responder_identification_code))
+    (comment
+      &quot;Responder holds its own private key (non-orig) to decrypt the Initiator&apos;s AUCH; the Responder&apos;s AUCH uses the Initiator&apos;s public key.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k3">Item <a href="#t3">3</a>, Children: <a href="#k4">4</a> <a href="#k5">5</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='529.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 529.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle cx='39.960' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle style='fill: red;' cx='39.960' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Responder</text>
+   </g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 3</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars (challenge_for_initiator challenge_for_responder text)
+    (initiator_identification_code responder_identification_code name)
+    (handshake_channel chan))
+  (defstrand Responder 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_initiator)
+  (comment &quot;Responder POV; listeners intentionally empty.&quot;)
+  (label 3)
+  (unrealized (0 2))
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_initiator (0 1)))
+  (comment &quot;2 in cohort - 2 not yet seen&quot;))</pre>
+
+<p id="k4">Item <a href="#t3">4</a>, Parent: <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='529.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 529.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='264.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 264.960 Q 92.940 264.960 45.960 264.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle cx='139.920' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle style='fill: blue;' cx='139.920' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle cx='39.960' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle style='fill: blue;' cx='39.960' cy='264.960' r='6.000'/></g>
+  <path
+   d='M 39.960 189.960 Q 86.940 189.960 133.920 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (initiator_identification_code initiator_identification_code) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460' style='text-anchor: middle;'>Initiator</text>
+   </g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Responder</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 4</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars (challenge_for_initiator challenge_for_responder text)
+    (initiator_identification_code responder_identification_code name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand Responder 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (defstrand Initiator 3
+    (challenge_for_initiator challenge_for_initiator)
+    (initiator_identification_code initiator_identification_code)
+    (handshake_channel handshake_channel-0))
+  (precedes ((0 1) (1 1)) ((1 2) (0 2)))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_initiator)
+  (comment &quot;Responder POV; listeners intentionally empty.&quot;)
+  (operation nonce-test (added-strand Initiator 3)
+    challenge_for_initiator (0 2)
+    (enc challenge_for_initiator (pubk initiator_identification_code)))
+  (strand-map 0)
+  (label 4)
+  (parent 3)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_initiator (0 1))))</pre>
+
+<p id="k5">Item <a href="#t3">5</a>, Parent: <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='754.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 754.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='489.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='339.960' x2='39.960' y2='714.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 489.960 Q 92.940 489.960 45.960 489.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle cx='139.920' cy='489.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle style='fill: blue;' cx='139.920' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle cx='139.920' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AURP&quot; challenge_for_initiator-0))</title>
+   <circle style='fill: blue;' cx='139.920' cy='264.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (cat &quot;AUCH&quot; (enc challenge_for_initiator-0 (pubk initiator_identification_code-0))))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel-0 &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_responder))</title>
+   <circle cx='39.960' cy='714.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_responder (pubk responder_identification_code))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='639.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle cx='39.960' cy='564.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AURP&quot; challenge_for_initiator))</title>
+   <circle style='fill: blue;' cx='39.960' cy='489.960' r='6.000'/></g>
+  <path
+   d='M 39.960 414.960 Q 86.940 414.960 133.920 414.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (cat &quot;AUCH&quot; (enc challenge_for_initiator (pubk initiator_identification_code))))</title>
+   <circle cx='39.960' cy='414.960' r='6.000'/></g>
+  <g><title>(ch-msg handshake_channel &quot;SECD&quot;)</title>
+   <circle style='fill: blue;' cx='39.960' cy='339.960' r='6.000'/></g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator-0) (challenge_for_responder challenge_for_initiator) (initiator_identification_code initiator_identification_code-0) (responder_identification_code initiator_identification_code) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460' style='text-anchor: middle;'>Responder</text>
+   </g>
+  <g>
+   <title>((challenge_for_initiator challenge_for_initiator) (challenge_for_responder challenge_for_responder) (initiator_identification_code initiator_identification_code) (responder_identification_code responder_identification_code) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>Responder</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>ODETTE-FTP-v2-Secure-Authentication 5</text>
+  </svg></div>
+
+<pre>(defskeleton ODETTE-FTP-v2-Secure-Authentication
+  (vars
+    (challenge_for_initiator challenge_for_responder
+      challenge_for_initiator-0 text)
+    (initiator_identification_code responder_identification_code
+      initiator_identification_code-0 name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand Responder 6
+    (challenge_for_initiator challenge_for_initiator)
+    (challenge_for_responder challenge_for_responder)
+    (initiator_identification_code initiator_identification_code)
+    (responder_identification_code responder_identification_code)
+    (handshake_channel handshake_channel))
+  (defstrand Responder 6
+    (challenge_for_initiator challenge_for_initiator-0)
+    (challenge_for_responder challenge_for_initiator)
+    (initiator_identification_code initiator_identification_code-0)
+    (responder_identification_code initiator_identification_code)
+    (handshake_channel handshake_channel-0))
+  (precedes ((0 1) (1 4)) ((1 5) (0 2)))
+  (non-orig (privk initiator_identification_code)
+    (privk responder_identification_code))
+  (uniq-orig challenge_for_initiator challenge_for_initiator-0)
+  (comment &quot;Responder POV; listeners intentionally empty.&quot;)
+  (operation nonce-test (added-strand Responder 6)
+    challenge_for_initiator (0 2)
+    (enc challenge_for_initiator (pubk initiator_identification_code)))
+  (strand-map 0)
+  (label 5)
+  (parent 3)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((handshake_channel handshake_channel)
+        (initiator_identification_code initiator_identification_code)
+        (responder_identification_code responder_identification_code)
+        (challenge_for_initiator challenge_for_initiator)
+        (challenge_for_responder challenge_for_responder))))
+  (origs (challenge_for_initiator-0 (1 1))
+    (challenge_for_initiator (0 1))))</pre>
+
+</body>
+</html>

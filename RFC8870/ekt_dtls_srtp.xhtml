@@ -1,0 +1,1225 @@
+<?xml version="1.0"?>
+<!-- CPSA 4.4.9 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>EKT_DTLS_SRTP Protocol Verification Suite</title>
+ <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+ <style>
+  svg.diagram { border-width: 1px; border-style: solid }
+ </style>
+</head>
+<body>
+
+<pre>(herald &quot;EKT_DTLS_SRTP Protocol Verification Suite&quot;)
+(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;All input read from ekt_dtls_srtp.scm&quot;)</pre>
+
+<p id="top">Trees: <a href="#t0">0</a> <a href="#t4">4</a> <a href="#t6">6</a> <a href="#t7">7</a> <a href="#t9">9</a>.</p>
+
+<p id="t0">Tree <a href="#top">0</a>, POV <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.760pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.760 154.920' font-size='12.000'>
+  <text
+   x='139.800' y='101.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k3&quot;, &quot;_self&quot;)'>3</text>
+  <line
+   x1='89.880' y1='77.460' x2='139.800' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='139.800' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k2&quot;, &quot;_self&quot;)'>2</text>
+  <line
+   x1='89.880' y1='77.460' x2='139.800' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='89.880' y='63.540' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k1&quot;, &quot;_self&quot;)'>1</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='77.460'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='63.540' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k0&quot;, &quot;_self&quot;)'>0</text>
+  </svg></div>
+
+<pre>(defprotocol EKT_DTLS_SRTP basic
+  (defrole DTLS_SRTP_Server
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (send dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (recv dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (uniq-orig ekt_key_value)
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name srtp_master_salt
+      ekt_spi ekt_ttl (ltk server_name client_name)))
+  (defrole DTLS_SRTP_Client
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (recv dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (send dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name
+      (ltk server_name client_name))
+    (outputs ekt_key_value srtp_master_salt ekt_spi))
+  (defrole EKT_Sender
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (send srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (uniq-orig srtp_master_key)
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length))
+  (defrole EKT_Receiver
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (recv srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length)
+    (outputs srtp_master_key))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k0">Item <a href="#t0">0</a>, Child: <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle style='fill: red;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 0</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars (srtp_master_salt ekt_spi ekt_ttl data) (ekt_key_value skey)
+    (server_name client_name name) (dtls_channel chan))
+  (defstrand DTLS_SRTP_Server 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (non-orig (ltk server_name client_name))
+  (uniq-orig ekt_key_value)
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder/initiator POV for server; no listeners.&quot;)
+  (label 0)
+  (unrealized (0 1))
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (origs (ekt_key_value (0 0)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k1">Item <a href="#t0">1</a>, Parent: <a href="#k0">0</a>, Children: <a href="#k2">2</a> <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value-0 srtp_master_salt-0 ekt_spi ekt_ttl-0 (ltk server_name client_name)))</title>
+   <circle style='fill: red;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt-0) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0) (ekt_key_value ekt_key_value-0) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Client</text></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 1</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_salt ekt_spi ekt_ttl srtp_master_salt-0 ekt_ttl-0 data)
+    (ekt_key_value ekt_key_value-0 skey) (server_name client_name name)
+    (dtls_channel chan))
+  (defstrand DTLS_SRTP_Server 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (defstrand DTLS_SRTP_Client 2 (srtp_master_salt srtp_master_salt-0)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0)
+    (ekt_key_value ekt_key_value-0) (server_name server_name)
+    (client_name client_name) (dtls_channel dtls_channel))
+  (precedes ((1 1) (0 1)))
+  (non-orig (ltk server_name client_name))
+  (uniq-orig ekt_key_value)
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder/initiator POV for server; no listeners.&quot;)
+  (operation channel-test (added-strand DTLS_SRTP_Client 2)
+    (ch-msg dtls_channel
+      (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))) (0 1))
+  (strand-map 0)
+  (label 1)
+  (parent 0)
+  (unrealized (1 0))
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (comment &quot;2 in cohort - 2 not yet seen&quot;))</pre>
+
+<p id="k2">Item <a href="#t0">2</a>, Parent: <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Client</text></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 2</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars (srtp_master_salt ekt_spi ekt_ttl data) (ekt_key_value skey)
+    (server_name client_name name) (dtls_channel chan))
+  (defstrand DTLS_SRTP_Server 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (defstrand DTLS_SRTP_Client 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (precedes ((0 0) (1 0)) ((1 1) (0 1)))
+  (non-orig (ltk server_name client_name))
+  (uniq-orig ekt_key_value)
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder/initiator POV for server; no listeners.&quot;)
+  (operation channel-test (displaced 2 0 DTLS_SRTP_Server 1)
+    (ch-msg dtls_channel
+      (enc &quot;EKTKey&quot; ekt_key_value-0 srtp_master_salt-0 ekt_spi ekt_ttl-0
+        (ltk server_name client_name))) (1 0))
+  (strand-map 0 1)
+  (label 2)
+  (parent 1)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (origs (ekt_key_value (0 0))))</pre>
+
+<p id="k3">Item <a href="#t0">3</a>, Parent: <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='279.840pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 279.840 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='239.880' y1='114.960' x2='239.880' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 239.880 114.960 Q 192.900 114.960 145.920 114.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value-0 srtp_master_salt-0 ekt_spi ekt_ttl-0 (ltk server_name client_name)))</title>
+   <circle cx='239.880' cy='114.960' r='6.000'/></g>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value-0 srtp_master_salt-0 ekt_spi ekt_ttl-0 (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt-0) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0) (ekt_key_value ekt_key_value-0) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='239.880' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt-0) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0) (ekt_key_value ekt_key_value-0) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Client</text></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <text
+   x='139.920' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 3</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_salt ekt_spi ekt_ttl srtp_master_salt-0 ekt_ttl-0 data)
+    (ekt_key_value ekt_key_value-0 skey) (server_name client_name name)
+    (dtls_channel chan))
+  (defstrand DTLS_SRTP_Server 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (defstrand DTLS_SRTP_Client 2 (srtp_master_salt srtp_master_salt-0)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0)
+    (ekt_key_value ekt_key_value-0) (server_name server_name)
+    (client_name client_name) (dtls_channel dtls_channel))
+  (defstrand DTLS_SRTP_Server 1 (srtp_master_salt srtp_master_salt-0)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl-0)
+    (ekt_key_value ekt_key_value-0) (server_name server_name)
+    (client_name client_name) (dtls_channel dtls_channel))
+  (precedes ((1 1) (0 1)) ((2 0) (1 0)))
+  (non-orig (ltk server_name client_name))
+  (uniq-orig ekt_key_value ekt_key_value-0)
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder/initiator POV for server; no listeners.&quot;)
+  (operation channel-test (added-strand DTLS_SRTP_Server 1)
+    (ch-msg dtls_channel
+      (enc &quot;EKTKey&quot; ekt_key_value-0 srtp_master_salt-0 ekt_spi ekt_ttl-0
+        (ltk server_name client_name))) (1 0))
+  (strand-map 0 1)
+  (label 3)
+  (parent 1)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (origs (ekt_key_value-0 (2 0)) (ekt_key_value (0 0))))</pre>
+
+<p id="t4">Tree <a href="#top">4</a>, POV <a href="#k4">4</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k5&quot;, &quot;_self&quot;)'>5</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k4&quot;, &quot;_self&quot;)'>4</text>
+  </svg></div>
+
+<pre>(defprotocol EKT_DTLS_SRTP basic
+  (defrole DTLS_SRTP_Server
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (send dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (recv dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (uniq-orig ekt_key_value)
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name srtp_master_salt
+      ekt_spi ekt_ttl (ltk server_name client_name)))
+  (defrole DTLS_SRTP_Client
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (recv dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (send dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name
+      (ltk server_name client_name))
+    (outputs ekt_key_value srtp_master_salt ekt_spi))
+  (defrole EKT_Sender
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (send srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (uniq-orig srtp_master_key)
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length))
+  (defrole EKT_Receiver
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (recv srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length)
+    (outputs srtp_master_key))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k4">Item <a href="#t4">4</a>, Child: <a href="#k5">5</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle style='fill: red;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Client</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 4</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars (srtp_master_salt ekt_spi ekt_ttl data) (ekt_key_value skey)
+    (server_name client_name name) (dtls_channel chan))
+  (defstrand DTLS_SRTP_Client 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (non-orig (ltk server_name client_name))
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder POV for client; no listeners.&quot;)
+  (label 4)
+  (unrealized (0 0))
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (origs)
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k5">Item <a href="#t4">5</a>, Parent: <a href="#k4">4</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 114.960 Q 92.940 114.960 45.960 114.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg dtls_channel (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl (ltk server_name client_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Server</text></g>
+  <g>
+   <title>((srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value) (server_name server_name) (client_name client_name) (dtls_channel dtls_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>DTLS_SRTP_Client</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 5</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars (srtp_master_salt ekt_spi ekt_ttl data) (ekt_key_value skey)
+    (server_name client_name name) (dtls_channel chan))
+  (defstrand DTLS_SRTP_Client 2 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (defstrand DTLS_SRTP_Server 1 (srtp_master_salt srtp_master_salt)
+    (ekt_spi ekt_spi) (ekt_ttl ekt_ttl) (ekt_key_value ekt_key_value)
+    (server_name server_name) (client_name client_name)
+    (dtls_channel dtls_channel))
+  (precedes ((1 0) (0 0)))
+  (non-orig (ltk server_name client_name))
+  (uniq-orig ekt_key_value)
+  (conf dtls_channel)
+  (auth dtls_channel)
+  (comment &quot;Responder POV for client; no listeners.&quot;)
+  (operation channel-test (added-strand DTLS_SRTP_Server 1)
+    (ch-msg dtls_channel
+      (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+        (ltk server_name client_name))) (0 0))
+  (strand-map 0)
+  (label 5)
+  (parent 4)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((server_name server_name) (client_name client_name)
+        (dtls_channel dtls_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_salt srtp_master_salt) (ekt_spi ekt_spi)
+        (ekt_ttl ekt_ttl))))
+  (origs (ekt_key_value (1 0))))</pre>
+
+<p id="t6">Tree <a href="#top">6</a>, POV <a href="#k6">6</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 79.920' font-size='12.000'>
+  <text
+   x='39.960' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k6&quot;, &quot;_self&quot;)'>6</text>
+  </svg></div>
+
+<pre>(defprotocol EKT_DTLS_SRTP basic
+  (defrole DTLS_SRTP_Server
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (send dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (recv dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (uniq-orig ekt_key_value)
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name srtp_master_salt
+      ekt_spi ekt_ttl (ltk server_name client_name)))
+  (defrole DTLS_SRTP_Client
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (recv dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (send dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name
+      (ltk server_name client_name))
+    (outputs ekt_key_value srtp_master_salt ekt_spi))
+  (defrole EKT_Sender
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (send srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (uniq-orig srtp_master_key)
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length))
+  (defrole EKT_Receiver
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (recv srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length)
+    (outputs srtp_master_key))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k6">Item <a href="#t6">6</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 154.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg srtp_channel (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi epoch ekt_msg_length &quot;EKTMsgTypeFull&quot;))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch) (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>EKT_Sender</text>
+   </g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 6</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_key_length srtp_master_key ekt_spi epoch ekt_msg_length
+      data) (ekt_key_value skey) (ssrc roc text) (srtp_channel chan))
+  (defstrand EKT_Sender 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch)
+    (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value)
+    (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))
+  (non-orig ekt_key_value)
+  (uniq-orig srtp_master_key)
+  (comment &quot;Ekt_sender Point of View&quot;)
+  (label 6)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((srtp_channel srtp_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_key_length srtp_master_key_length)
+        (srtp_master_key srtp_master_key) (ekt_spi ekt_spi)
+        (epoch epoch) (ekt_msg_length ekt_msg_length) (ssrc ssrc)
+        (roc roc))))
+  (origs (srtp_master_key (0 0))))</pre>
+
+<p id="t7">Tree <a href="#top">7</a>, POV <a href="#k7">7</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k8&quot;, &quot;_self&quot;)'>8</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k7&quot;, &quot;_self&quot;)'>7</text>
+  </svg></div>
+
+<pre>(defprotocol EKT_DTLS_SRTP basic
+  (defrole DTLS_SRTP_Server
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (send dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (recv dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (uniq-orig ekt_key_value)
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name srtp_master_salt
+      ekt_spi ekt_ttl (ltk server_name client_name)))
+  (defrole DTLS_SRTP_Client
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (recv dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (send dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name
+      (ltk server_name client_name))
+    (outputs ekt_key_value srtp_master_salt ekt_spi))
+  (defrole EKT_Sender
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (send srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (uniq-orig srtp_master_key)
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length))
+  (defrole EKT_Receiver
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (recv srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length)
+    (outputs srtp_master_key))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k7">Item <a href="#t7">7</a>, Child: <a href="#k8">8</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 154.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg srtp_channel (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi epoch ekt_msg_length &quot;EKTMsgTypeFull&quot;))</title>
+   <circle style='fill: red;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch) (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>EKT_Receiver</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 7</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_key_length srtp_master_key ekt_spi epoch ekt_msg_length
+      data) (ekt_key_value skey) (ssrc roc text) (srtp_channel chan))
+  (defstrand EKT_Receiver 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch)
+    (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value)
+    (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))
+  (non-orig ekt_key_value)
+  (comment &quot;Ekt_receiver Point of View&quot;)
+  (label 7)
+  (unrealized (0 0))
+  (maps
+    ((0)
+      ((srtp_channel srtp_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_key_length srtp_master_key_length)
+        (srtp_master_key srtp_master_key) (ekt_spi ekt_spi)
+        (epoch epoch) (ekt_msg_length ekt_msg_length) (ssrc ssrc)
+        (roc roc))))
+  (origs)
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k8">Item <a href="#t7">8</a>, Parent: <a href="#k7">7</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 154.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 114.960 Q 92.940 114.960 45.960 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg srtp_channel-0 (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi-0 epoch-0 ekt_msg_length-0 &quot;EKTMsgTypeFull&quot;))</title>
+   <circle cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg srtp_channel (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi epoch ekt_msg_length &quot;EKTMsgTypeFull&quot;))</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi-0) (epoch epoch-0) (ekt_msg_length ekt_msg_length-0) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>EKT_Sender</text></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch) (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>EKT_Receiver</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 8</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_key_length srtp_master_key ekt_spi epoch ekt_msg_length
+      ekt_spi-0 epoch-0 ekt_msg_length-0 data) (ekt_key_value skey)
+    (ssrc roc text) (srtp_channel srtp_channel-0 chan))
+  (defstrand EKT_Receiver 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch)
+    (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value)
+    (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))
+  (defstrand EKT_Sender 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi-0)
+    (epoch epoch-0) (ekt_msg_length ekt_msg_length-0)
+    (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc)
+    (srtp_channel srtp_channel-0))
+  (precedes ((1 0) (0 0)))
+  (non-orig ekt_key_value)
+  (uniq-orig srtp_master_key)
+  (comment &quot;Ekt_receiver Point of View&quot;)
+  (operation encryption-test (added-strand EKT_Sender 1)
+    (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value)
+    (0 0))
+  (strand-map 0)
+  (label 8)
+  (parent 7)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((srtp_channel srtp_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_key_length srtp_master_key_length)
+        (srtp_master_key srtp_master_key) (ekt_spi ekt_spi)
+        (epoch epoch) (ekt_msg_length ekt_msg_length) (ssrc ssrc)
+        (roc roc))))
+  (origs (srtp_master_key (1 0))))</pre>
+
+<p id="t9">Tree <a href="#top">9</a>, POV <a href="#k9">9</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040' style='text-anchor: middle; fill: red;'
+   onclick='window.open(&quot;#k10&quot;, &quot;_self&quot;)'>10</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: red;'
+   onclick='window.open(&quot;#k9&quot;, &quot;_self&quot;)'>9</text>
+  </svg></div>
+
+<pre>(defprotocol EKT_DTLS_SRTP basic
+  (defrole DTLS_SRTP_Server
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (send dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (recv dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (uniq-orig ekt_key_value)
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name srtp_master_salt
+      ekt_spi ekt_ttl (ltk server_name client_name)))
+  (defrole DTLS_SRTP_Client
+    (vars (server_name client_name name) (dtls_channel chan)
+      (ekt_key_value skey) (srtp_master_salt ekt_spi ekt_ttl data))
+    (trace
+      (recv dtls_channel
+        (enc &quot;EKTKey&quot; ekt_key_value srtp_master_salt ekt_spi ekt_ttl
+          (ltk server_name client_name)))
+      (send dtls_channel
+        (enc &quot;EKT_ACK&quot; ekt_spi (ltk server_name client_name))))
+    (conf dtls_channel)
+    (auth dtls_channel)
+    (inputs dtls_channel server_name client_name
+      (ltk server_name client_name))
+    (outputs ekt_key_value srtp_master_salt ekt_spi))
+  (defrole EKT_Sender
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (send srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (uniq-orig srtp_master_key)
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length))
+  (defrole EKT_Receiver
+    (vars (srtp_channel chan) (ekt_key_value skey)
+      (srtp_master_key_length srtp_master_key ekt_spi epoch
+        ekt_msg_length data) (ssrc roc text))
+    (trace
+      (recv srtp_channel
+        (cat
+          (enc srtp_master_key_length srtp_master_key ssrc roc
+            ekt_key_value) ekt_spi epoch ekt_msg_length
+          &quot;EKTMsgTypeFull&quot;)))
+    (inputs srtp_channel ekt_key_value srtp_master_key_length ssrc roc
+      ekt_spi epoch ekt_msg_length)
+    (outputs srtp_master_key))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k9">Item <a href="#t9">9</a>, Child: <a href="#k10">10</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g><title>srtp_master_key</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g><title>srtp_master_key</title>
+   <circle style='fill: red;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg srtp_channel (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi epoch ekt_msg_length &quot;EKTMsgTypeFull&quot;))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch) (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>EKT_Sender</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 9</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_key_length srtp_master_key ekt_spi epoch ekt_msg_length
+      data) (ekt_key_value skey) (ssrc roc text) (srtp_channel chan))
+  (defstrand EKT_Sender 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch)
+    (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value)
+    (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))
+  (deflistener srtp_master_key)
+  (non-orig ekt_key_value)
+  (uniq-orig srtp_master_key)
+  (facts (neq srtp_master_key srtp_master_key_length)
+    (neq srtp_master_key ekt_spi) (neq srtp_master_key epoch)
+    (neq srtp_master_key ekt_msg_length))
+  (comment
+    &quot;Confidentiality of SRTP master key transported under the EKTKey.&quot;)
+  (label 9)
+  (unrealized (1 0))
+  (preskeleton)
+  (maps
+    ((0 1)
+      ((srtp_channel srtp_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_key_length srtp_master_key_length)
+        (srtp_master_key srtp_master_key) (ekt_spi ekt_spi)
+        (epoch epoch) (ekt_msg_length ekt_msg_length) (ssrc ssrc)
+        (roc roc))))
+  (origs (srtp_master_key (0 0)))
+  (comment &quot;Not a skeleton&quot;))</pre>
+
+<p id="k10">Item <a href="#t9">10</a>, Parent: <a href="#k9">9</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g><title>srtp_master_key</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g><title>srtp_master_key</title>
+   <circle style='fill: red;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg srtp_channel (cat (enc srtp_master_key_length srtp_master_key ssrc roc ekt_key_value) ekt_spi epoch ekt_msg_length &quot;EKTMsgTypeFull&quot;))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((srtp_master_key_length srtp_master_key_length) (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch) (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value) (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>EKT_Sender</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>EKT_DTLS_SRTP 10</text></svg></div>
+
+<pre>(defskeleton EKT_DTLS_SRTP
+  (vars
+    (srtp_master_key_length srtp_master_key ekt_spi epoch ekt_msg_length
+      data) (ekt_key_value skey) (ssrc roc text) (srtp_channel chan))
+  (defstrand EKT_Sender 1
+    (srtp_master_key_length srtp_master_key_length)
+    (srtp_master_key srtp_master_key) (ekt_spi ekt_spi) (epoch epoch)
+    (ekt_msg_length ekt_msg_length) (ekt_key_value ekt_key_value)
+    (ssrc ssrc) (roc roc) (srtp_channel srtp_channel))
+  (deflistener srtp_master_key)
+  (precedes ((0 0) (1 0)))
+  (non-orig ekt_key_value)
+  (uniq-orig srtp_master_key)
+  (facts (neq srtp_master_key srtp_master_key_length)
+    (neq srtp_master_key ekt_spi) (neq srtp_master_key epoch)
+    (neq srtp_master_key ekt_msg_length))
+  (comment
+    &quot;Confidentiality of SRTP master key transported under the EKTKey.&quot;)
+  (label 10)
+  (parent 9)
+  (unrealized (1 0))
+  (dead)
+  (maps
+    ((0 1)
+      ((srtp_channel srtp_channel) (ekt_key_value ekt_key_value)
+        (srtp_master_key_length srtp_master_key_length)
+        (srtp_master_key srtp_master_key) (ekt_spi ekt_spi)
+        (epoch epoch) (ekt_msg_length ekt_msg_length) (ssrc ssrc)
+        (roc roc))))
+  (origs (srtp_master_key (0 0)))
+  (comment &quot;empty cohort&quot;))</pre>
+
+</body>
+</html>

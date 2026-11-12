@@ -1,0 +1,343 @@
+<?xml version="1.0"?>
+<!-- CPSA 4.4.9 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>onion_csr_01 Protocol Verification Suite</title>
+ <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+ <style>
+  svg.diagram { border-width: 1px; border-style: solid }
+ </style>
+</head>
+<body>
+
+<pre>(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;Extracted shapes&quot;)
+(herald &quot;onion_csr_01 Protocol Verification Suite&quot;)
+(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;All input read from onion_csr_01.scm&quot;)</pre>
+
+<p id="top">Trees: <a href="#t0">0</a> <a href="#t1">1</a>.</p>
+
+<p id="t0">Tree <a href="#top">0</a>, POV <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 79.920' font-size='12.000'>
+  <text
+   x='39.960' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k0&quot;, &quot;_self&quot;)'>0</text>
+  </svg></div>
+
+<pre>(defprotocol onion_csr_01 basic
+  (defrole ACME_Client
+    (vars (acme_channel chan) (onion_service_name name)
+      (challenge_nonce applicant_signing_nonce text)
+      (acme_auth_key data))
+    (trace
+      (recv acme_channel
+        (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))
+      (send acme_channel
+        (cat &quot;csr&quot;
+          (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot;
+            applicant_signing_nonce (pubk onion_service_name)
+            (privk onion_service_name)))))
+    (non-orig (privk onion_service_name))
+    (uniq-orig applicant_signing_nonce)
+    (inputs acme_channel onion_service_name (pubk onion_service_name)
+      (privk onion_service_name))
+    (comment
+      &quot;Client holds the .onion private key (Tor Hidden Service key holder); the key is non-originating.&quot;))
+  (defrole ACME_Server
+    (vars (acme_channel chan) (onion_service_name name)
+      (challenge_nonce applicant_signing_nonce text)
+      (acme_auth_key data))
+    (trace
+      (send acme_channel
+        (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))
+      (recv acme_channel
+        (cat &quot;csr&quot;
+          (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot;
+            applicant_signing_nonce (pubk onion_service_name)
+            (privk onion_service_name)))))
+    (uniq-orig challenge_nonce)
+    (inputs acme_channel onion_service_name acme_auth_key
+      (pubk onion_service_name))
+    (comment
+      &quot;The RFC does not define a further server response flight; validation success or failure is a local decision.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k0">Item <a href="#t0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;csr&quot; (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot; applicant_signing_nonce (pubk onion_service_name) (privk onion_service_name))))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((acme_auth_key acme_auth_key) (challenge_nonce challenge_nonce) (applicant_signing_nonce applicant_signing_nonce) (onion_service_name onion_service_name) (acme_channel acme_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>ACME_Client</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>onion_csr_01 0</text></svg></div>
+
+<pre>(defskeleton onion_csr_01
+  (vars (acme_auth_key data)
+    (challenge_nonce applicant_signing_nonce text)
+    (onion_service_name name) (acme_channel chan))
+  (defstrand ACME_Client 2 (acme_auth_key acme_auth_key)
+    (challenge_nonce challenge_nonce)
+    (applicant_signing_nonce applicant_signing_nonce)
+    (onion_service_name onion_service_name) (acme_channel acme_channel))
+  (non-orig (privk onion_service_name))
+  (uniq-orig applicant_signing_nonce)
+  (comment
+    &quot;Authentication-only exchange; no secrecy goals, so no deflistener.&quot;)
+  (label 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((acme_channel acme_channel)
+        (onion_service_name onion_service_name)
+        (challenge_nonce challenge_nonce)
+        (applicant_signing_nonce applicant_signing_nonce)
+        (acme_auth_key acme_auth_key))))
+  (origs (applicant_signing_nonce (0 1))))</pre>
+
+<p id="t1">Tree <a href="#top">1</a>, POV <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k2&quot;, &quot;_self&quot;)'>2</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k1&quot;, &quot;_self&quot;)'>1</text>
+  </svg></div>
+
+<pre>(defprotocol onion_csr_01 basic
+  (defrole ACME_Client
+    (vars (acme_channel chan) (onion_service_name name)
+      (challenge_nonce applicant_signing_nonce text)
+      (acme_auth_key data))
+    (trace
+      (recv acme_channel
+        (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))
+      (send acme_channel
+        (cat &quot;csr&quot;
+          (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot;
+            applicant_signing_nonce (pubk onion_service_name)
+            (privk onion_service_name)))))
+    (non-orig (privk onion_service_name))
+    (uniq-orig applicant_signing_nonce)
+    (inputs acme_channel onion_service_name (pubk onion_service_name)
+      (privk onion_service_name))
+    (comment
+      &quot;Client holds the .onion private key (Tor Hidden Service key holder); the key is non-originating.&quot;))
+  (defrole ACME_Server
+    (vars (acme_channel chan) (onion_service_name name)
+      (challenge_nonce applicant_signing_nonce text)
+      (acme_auth_key data))
+    (trace
+      (send acme_channel
+        (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))
+      (recv acme_channel
+        (cat &quot;csr&quot;
+          (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot;
+            applicant_signing_nonce (pubk onion_service_name)
+            (privk onion_service_name)))))
+    (uniq-orig challenge_nonce)
+    (inputs acme_channel onion_service_name acme_auth_key
+      (pubk onion_service_name))
+    (comment
+      &quot;The RFC does not define a further server response flight; validation success or failure is a local decision.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k1">Item <a href="#t1">1</a>, Child: <a href="#k2">2</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;csr&quot; (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot; applicant_signing_nonce (pubk onion_service_name) (privk onion_service_name))))</title>
+   <circle style='fill: red;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((acme_auth_key acme_auth_key) (challenge_nonce challenge_nonce) (applicant_signing_nonce applicant_signing_nonce) (onion_service_name onion_service_name) (acme_channel acme_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>ACME_Server</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>onion_csr_01 1</text></svg></div>
+
+<pre>(defskeleton onion_csr_01
+  (vars (acme_auth_key data)
+    (challenge_nonce applicant_signing_nonce text)
+    (onion_service_name name) (acme_channel chan))
+  (defstrand ACME_Server 2 (acme_auth_key acme_auth_key)
+    (challenge_nonce challenge_nonce)
+    (applicant_signing_nonce applicant_signing_nonce)
+    (onion_service_name onion_service_name) (acme_channel acme_channel))
+  (non-orig (privk onion_service_name))
+  (uniq-orig challenge_nonce)
+  (comment
+    &quot;Mutual authentication view; the server verifies the CSR signature against the .onion public key.&quot;)
+  (label 1)
+  (unrealized (0 1))
+  (maps
+    ((0)
+      ((acme_channel acme_channel)
+        (onion_service_name onion_service_name)
+        (challenge_nonce challenge_nonce)
+        (applicant_signing_nonce applicant_signing_nonce)
+        (acme_auth_key acme_auth_key))))
+  (origs (challenge_nonce (0 0)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k2">Item <a href="#t1">2</a>, Parent: <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg acme_channel-0 (cat &quot;csr&quot; (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot; applicant_signing_nonce (pubk onion_service_name) (privk onion_service_name))))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg acme_channel-0 (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key-0))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;csr&quot; (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot; applicant_signing_nonce (pubk onion_service_name) (privk onion_service_name))))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg acme_channel (cat &quot;onion-csr-01&quot; challenge_nonce acme_auth_key))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((acme_auth_key acme_auth_key-0) (challenge_nonce challenge_nonce) (applicant_signing_nonce applicant_signing_nonce) (onion_service_name onion_service_name) (acme_channel acme_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>ACME_Client</text></g>
+  <g>
+   <title>((acme_auth_key acme_auth_key) (challenge_nonce challenge_nonce) (applicant_signing_nonce applicant_signing_nonce) (onion_service_name onion_service_name) (acme_channel acme_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>ACME_Server</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>onion_csr_01 2</text></svg></div>
+
+<pre>(defskeleton onion_csr_01
+  (vars (acme_auth_key acme_auth_key-0 data)
+    (challenge_nonce applicant_signing_nonce text)
+    (onion_service_name name) (acme_channel acme_channel-0 chan))
+  (defstrand ACME_Server 2 (acme_auth_key acme_auth_key)
+    (challenge_nonce challenge_nonce)
+    (applicant_signing_nonce applicant_signing_nonce)
+    (onion_service_name onion_service_name) (acme_channel acme_channel))
+  (defstrand ACME_Client 2 (acme_auth_key acme_auth_key-0)
+    (challenge_nonce challenge_nonce)
+    (applicant_signing_nonce applicant_signing_nonce)
+    (onion_service_name onion_service_name)
+    (acme_channel acme_channel-0))
+  (precedes ((0 0) (1 0)) ((1 1) (0 1)))
+  (non-orig (privk onion_service_name))
+  (uniq-orig challenge_nonce applicant_signing_nonce)
+  (comment
+    &quot;Mutual authentication view; the server verifies the CSR signature against the .onion public key.&quot;)
+  (operation encryption-test (added-strand ACME_Client 2)
+    (enc &quot;caSigningNonce&quot; challenge_nonce &quot;applicantSigningNonce&quot;
+      applicant_signing_nonce (pubk onion_service_name)
+      (privk onion_service_name)) (0 1))
+  (strand-map 0)
+  (label 2)
+  (parent 1)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((acme_channel acme_channel)
+        (onion_service_name onion_service_name)
+        (challenge_nonce challenge_nonce)
+        (applicant_signing_nonce applicant_signing_nonce)
+        (acme_auth_key acme_auth_key))))
+  (origs (applicant_signing_nonce (1 1)) (challenge_nonce (0 0))))</pre>
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+<?xml version="1.0"?>
+<!-- CPSA 4.4.9 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>CMC-Certificate-Management-over-CMS Protocol Verification Suite</title>
+ <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+ <style>
+  svg.diagram { border-width: 1px; border-style: solid }
+ </style>
+</head>
+<body>
+
+<pre>(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;Extracted shapes&quot;)
+(herald
+  &quot;CMC-Certificate-Management-over-CMS Protocol Verification Suite&quot;)
+(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;All input read from cmc-certificate-management-over-cms.scm&quot;)</pre>
+
+<p id="top">Trees: <a href="#t0">0</a> <a href="#t2">2</a>.</p>
+
+<p id="t0">Tree <a href="#top">0</a>, POV <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k1&quot;, &quot;_self&quot;)'>1</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k0&quot;, &quot;_self&quot;)'>0</text>
+  </svg></div>
+
+<pre>(defprotocol CMC-Certificate-Management-over-CMS basic
+  (defrole EndEntity
+    (vars (ee_name ca_name name)
+      (shared_secret subject_dn subject_public_key_info
+        issued_certificate data) (sender_nonce ca_sender_nonce text)
+      (handshake_channel chan))
+    (trace
+      (send handshake_channel
+        (enc &quot;id-cct-PKIData&quot; sender_nonce
+          (hash shared_secret subject_dn subject_public_key_info)
+          subject_dn subject_public_key_info (privk ee_name)))
+      (recv handshake_channel
+        (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot;
+          sender_nonce ca_sender_nonce issued_certificate
+          (privk ca_name))))
+    (uniq-orig sender_nonce)
+    (inputs handshake_channel ee_name ca_name shared_secret subject_dn
+      subject_public_key_info (privk ee_name) (pubk ca_name))
+    (outputs issued_certificate))
+  (defrole CertificationAuthority
+    (vars (ee_name ca_name name)
+      (shared_secret subject_dn subject_public_key_info
+        issued_certificate data) (sender_nonce ca_sender_nonce text)
+      (handshake_channel chan))
+    (trace
+      (recv handshake_channel
+        (enc &quot;id-cct-PKIData&quot; sender_nonce
+          (hash shared_secret subject_dn subject_public_key_info)
+          subject_dn subject_public_key_info (privk ee_name)))
+      (send handshake_channel
+        (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot;
+          sender_nonce ca_sender_nonce issued_certificate
+          (privk ca_name))))
+    (uniq-orig issued_certificate ca_sender_nonce)
+    (inputs handshake_channel ee_name ca_name shared_secret
+      (pubk ee_name) subject_dn subject_public_key_info
+      (privk ca_name)))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k0">Item <a href="#t0">0</a>, Child: <a href="#k1">1</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; sender_nonce ca_sender_nonce issued_certificate (privk ca_name)))</title>
+   <circle style='fill: red;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret subject_dn subject_public_key_info) subject_dn subject_public_key_info (privk ee_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((shared_secret shared_secret) (subject_dn subject_dn) (subject_public_key_info subject_public_key_info) (issued_certificate issued_certificate) (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce) (ee_name ee_name) (ca_name ca_name) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>EndEntity</text>
+   </g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>CMC-Certificate-Management-over-CMS 0</text>
+  </svg></div>
+
+<pre>(defskeleton CMC-Certificate-Management-over-CMS
+  (vars
+    (shared_secret subject_dn subject_public_key_info issued_certificate
+      data) (sender_nonce ca_sender_nonce text) (ee_name ca_name name)
+    (handshake_channel chan))
+  (defstrand EndEntity 2 (shared_secret shared_secret)
+    (subject_dn subject_dn)
+    (subject_public_key_info subject_public_key_info)
+    (issued_certificate issued_certificate) (sender_nonce sender_nonce)
+    (ca_sender_nonce ca_sender_nonce) (ee_name ee_name)
+    (ca_name ca_name) (handshake_channel handshake_channel))
+  (non-orig (privk ee_name) (privk ca_name))
+  (uniq-orig sender_nonce)
+  (comment &quot;Initiator POV; listeners intentionally empty.&quot;)
+  (label 0)
+  (unrealized (0 1))
+  (maps
+    ((0)
+      ((ee_name ee_name) (ca_name ca_name) (shared_secret shared_secret)
+        (subject_dn subject_dn)
+        (subject_public_key_info subject_public_key_info)
+        (issued_certificate issued_certificate)
+        (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce)
+        (handshake_channel handshake_channel))))
+  (origs (sender_nonce (0 0)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k1">Item <a href="#t0">1</a>, Parent: <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; sender_nonce ca_sender_nonce issued_certificate (privk ca_name)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret-0 subject_dn-0 subject_public_key_info-0) subject_dn-0 subject_public_key_info-0 (privk ee_name-0)))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; sender_nonce ca_sender_nonce issued_certificate (privk ca_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret subject_dn subject_public_key_info) subject_dn subject_public_key_info (privk ee_name)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((shared_secret shared_secret-0) (subject_dn subject_dn-0) (subject_public_key_info subject_public_key_info-0) (issued_certificate issued_certificate) (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce) (ee_name ee_name-0) (ca_name ca_name) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>CertificationAuthority</text></g>
+  <g>
+   <title>((shared_secret shared_secret) (subject_dn subject_dn) (subject_public_key_info subject_public_key_info) (issued_certificate issued_certificate) (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce) (ee_name ee_name) (ca_name ca_name) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>EndEntity</text>
+   </g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>CMC-Certificate-Management-over-CMS 1</text>
+  </svg></div>
+
+<pre>(defskeleton CMC-Certificate-Management-over-CMS
+  (vars
+    (shared_secret subject_dn subject_public_key_info issued_certificate
+      shared_secret-0 subject_dn-0 subject_public_key_info-0 data)
+    (sender_nonce ca_sender_nonce text) (ee_name ca_name ee_name-0 name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand EndEntity 2 (shared_secret shared_secret)
+    (subject_dn subject_dn)
+    (subject_public_key_info subject_public_key_info)
+    (issued_certificate issued_certificate) (sender_nonce sender_nonce)
+    (ca_sender_nonce ca_sender_nonce) (ee_name ee_name)
+    (ca_name ca_name) (handshake_channel handshake_channel))
+  (defstrand CertificationAuthority 2 (shared_secret shared_secret-0)
+    (subject_dn subject_dn-0)
+    (subject_public_key_info subject_public_key_info-0)
+    (issued_certificate issued_certificate) (sender_nonce sender_nonce)
+    (ca_sender_nonce ca_sender_nonce) (ee_name ee_name-0)
+    (ca_name ca_name) (handshake_channel handshake_channel-0))
+  (precedes ((0 0) (1 0)) ((1 1) (0 1)))
+  (non-orig (privk ee_name) (privk ca_name))
+  (uniq-orig issued_certificate sender_nonce ca_sender_nonce)
+  (comment &quot;Initiator POV; listeners intentionally empty.&quot;)
+  (operation encryption-test (added-strand CertificationAuthority 2)
+    (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot;
+      sender_nonce ca_sender_nonce issued_certificate (privk ca_name))
+    (0 1))
+  (strand-map 0)
+  (label 1)
+  (parent 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((ee_name ee_name) (ca_name ca_name) (shared_secret shared_secret)
+        (subject_dn subject_dn)
+        (subject_public_key_info subject_public_key_info)
+        (issued_certificate issued_certificate)
+        (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce)
+        (handshake_channel handshake_channel))))
+  (origs (ca_sender_nonce (1 1)) (issued_certificate (1 1))
+    (sender_nonce (0 0))))</pre>
+
+<p id="t2">Tree <a href="#top">2</a>, POV <a href="#k2">2</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k3&quot;, &quot;_self&quot;)'>3</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k2&quot;, &quot;_self&quot;)'>2</text>
+  </svg></div>
+
+<pre>(defprotocol CMC-Certificate-Management-over-CMS basic
+  (defrole EndEntity
+    (vars (ee_name ca_name name)
+      (shared_secret subject_dn subject_public_key_info
+        issued_certificate data) (sender_nonce ca_sender_nonce text)
+      (handshake_channel chan))
+    (trace
+      (send handshake_channel
+        (enc &quot;id-cct-PKIData&quot; sender_nonce
+          (hash shared_secret subject_dn subject_public_key_info)
+          subject_dn subject_public_key_info (privk ee_name)))
+      (recv handshake_channel
+        (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot;
+          sender_nonce ca_sender_nonce issued_certificate
+          (privk ca_name))))
+    (uniq-orig sender_nonce)
+    (inputs handshake_channel ee_name ca_name shared_secret subject_dn
+      subject_public_key_info (privk ee_name) (pubk ca_name))
+    (outputs issued_certificate))
+  (defrole CertificationAuthority
+    (vars (ee_name ca_name name)
+      (shared_secret subject_dn subject_public_key_info
+        issued_certificate data) (sender_nonce ca_sender_nonce text)
+      (handshake_channel chan))
+    (trace
+      (recv handshake_channel
+        (enc &quot;id-cct-PKIData&quot; sender_nonce
+          (hash shared_secret subject_dn subject_public_key_info)
+          subject_dn subject_public_key_info (privk ee_name)))
+      (send handshake_channel
+        (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot;
+          sender_nonce ca_sender_nonce issued_certificate
+          (privk ca_name))))
+    (uniq-orig issued_certificate ca_sender_nonce)
+    (inputs handshake_channel ee_name ca_name shared_secret
+      (pubk ee_name) subject_dn subject_public_key_info
+      (privk ca_name)))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k2">Item <a href="#t2">2</a>, Child: <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; sender_nonce ca_sender_nonce issued_certificate (privk ca_name)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret subject_dn subject_public_key_info) subject_dn subject_public_key_info (privk ee_name)))</title>
+   <circle style='fill: red;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((shared_secret shared_secret) (subject_dn subject_dn) (subject_public_key_info subject_public_key_info) (issued_certificate issued_certificate) (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce) (ee_name ee_name) (ca_name ca_name) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>CertificationAuthority</text></g>
+  <text
+   x='39.960' y='39.960'
+   style='text-anchor: middle;'>CMC-Certificate-Management-over-CMS 2</text>
+  </svg></div>
+
+<pre>(defskeleton CMC-Certificate-Management-over-CMS
+  (vars
+    (shared_secret subject_dn subject_public_key_info issued_certificate
+      data) (sender_nonce ca_sender_nonce text) (ee_name ca_name name)
+    (handshake_channel chan))
+  (defstrand CertificationAuthority 2 (shared_secret shared_secret)
+    (subject_dn subject_dn)
+    (subject_public_key_info subject_public_key_info)
+    (issued_certificate issued_certificate) (sender_nonce sender_nonce)
+    (ca_sender_nonce ca_sender_nonce) (ee_name ee_name)
+    (ca_name ca_name) (handshake_channel handshake_channel))
+  (non-orig (privk ee_name) (privk ca_name))
+  (uniq-orig issued_certificate ca_sender_nonce)
+  (comment &quot;Responder POV; listeners intentionally empty.&quot;)
+  (label 2)
+  (unrealized (0 0))
+  (maps
+    ((0)
+      ((ee_name ee_name) (ca_name ca_name) (shared_secret shared_secret)
+        (subject_dn subject_dn)
+        (subject_public_key_info subject_public_key_info)
+        (issued_certificate issued_certificate)
+        (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce)
+        (handshake_channel handshake_channel))))
+  (origs (issued_certificate (0 1)) (ca_sender_nonce (0 1)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k3">Item <a href="#t2">3</a>, Parent: <a href="#k2">2</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 114.960 Q 92.940 114.960 45.960 114.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret subject_dn subject_public_key_info) subject_dn subject_public_key_info (privk ee_name)))</title>
+   <circle cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; sender_nonce ca_sender_nonce issued_certificate (privk ca_name)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;id-cct-PKIData&quot; sender_nonce (hash shared_secret subject_dn subject_public_key_info) subject_dn subject_public_key_info (privk ee_name)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((shared_secret shared_secret) (subject_dn subject_dn) (subject_public_key_info subject_public_key_info) (sender_nonce sender_nonce) (ee_name ee_name) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460' style='text-anchor: middle;'>EndEntity</text>
+   </g>
+  <g>
+   <title>((shared_secret shared_secret) (subject_dn subject_dn) (subject_public_key_info subject_public_key_info) (issued_certificate issued_certificate) (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce) (ee_name ee_name) (ca_name ca_name) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>CertificationAuthority</text></g>
+  <text
+   x='89.940' y='39.960'
+   style='text-anchor: middle;'>CMC-Certificate-Management-over-CMS 3</text>
+  </svg></div>
+
+<pre>(defskeleton CMC-Certificate-Management-over-CMS
+  (vars
+    (shared_secret subject_dn subject_public_key_info issued_certificate
+      data) (sender_nonce ca_sender_nonce text) (ee_name ca_name name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand CertificationAuthority 2 (shared_secret shared_secret)
+    (subject_dn subject_dn)
+    (subject_public_key_info subject_public_key_info)
+    (issued_certificate issued_certificate) (sender_nonce sender_nonce)
+    (ca_sender_nonce ca_sender_nonce) (ee_name ee_name)
+    (ca_name ca_name) (handshake_channel handshake_channel))
+  (defstrand EndEntity 1 (shared_secret shared_secret)
+    (subject_dn subject_dn)
+    (subject_public_key_info subject_public_key_info)
+    (sender_nonce sender_nonce) (ee_name ee_name)
+    (handshake_channel handshake_channel-0))
+  (precedes ((1 0) (0 0)))
+  (non-orig (privk ee_name) (privk ca_name))
+  (uniq-orig issued_certificate sender_nonce ca_sender_nonce)
+  (comment &quot;Responder POV; listeners intentionally empty.&quot;)
+  (operation encryption-test (added-strand EndEntity 1)
+    (enc &quot;id-cct-PKIData&quot; sender_nonce
+      (hash shared_secret subject_dn subject_public_key_info) subject_dn
+      subject_public_key_info (privk ee_name)) (0 0))
+  (strand-map 0)
+  (label 3)
+  (parent 2)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((ee_name ee_name) (ca_name ca_name) (shared_secret shared_secret)
+        (subject_dn subject_dn)
+        (subject_public_key_info subject_public_key_info)
+        (issued_certificate issued_certificate)
+        (sender_nonce sender_nonce) (ca_sender_nonce ca_sender_nonce)
+        (handshake_channel handshake_channel))))
+  (origs (sender_nonce (1 0)) (issued_certificate (0 1))
+    (ca_sender_nonce (0 1))))</pre>
+
+</body>
+</html>

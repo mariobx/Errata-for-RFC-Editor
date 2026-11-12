@@ -1,0 +1,667 @@
+<?xml version="1.0"?>
+<!-- CPSA 4.4.9 -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <title>The exchange modeled is the explicit signing-certificate round trip in Appendix B.1. CMC also defines optional services, variants, and RA-mediated flows not instantiated in this concrete exchange.</title>
+ <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+ <style>
+  svg.diagram { border-width: 1px; border-style: solid }
+ </style>
+</head>
+<body>
+
+<pre>(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;Extracted shapes&quot;)
+(herald
+  &quot;The exchange modeled is the explicit signing-certificate round trip in Appendix B.1. CMC also defines optional services, variants, and RA-mediated flows not instantiated in this concrete exchange.&quot;)
+(comment &quot;CPSA 4.4.9&quot;)
+(comment &quot;All input read from cmc.scm&quot;)</pre>
+
+<p id="top">Trees: <a href="#t0">0</a> <a href="#t4">4</a>.</p>
+
+<p id="t0">Tree <a href="#top">0</a>, POV <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='154.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 154.920' font-size='12.000'>
+  <text
+   x='89.880' y='101.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k3&quot;, &quot;_self&quot;)'>3</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k2&quot;, &quot;_self&quot;)'>2</text>
+  <line
+   x1='39.960' y1='77.460' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='63.540' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k0&quot;, &quot;_self&quot;)'>0</text>
+  </svg></div>
+
+<pre>(defprotocol CMC basic
+  (defrole end_entity
+    (vars (end_entity certification_authority name)
+      (handshake_channel chan) (shared_secret skey)
+      (req_sequence cert_req_id subject_name issued_certificates data)
+      (subject_key_identifier sender_nonce server_sender_nonce text))
+    (trace
+      (send handshake_channel
+        (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence
+          &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence)
+          &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id
+          &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot;
+          (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot;
+          subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot;
+          (privk end_entity)))
+      (recv handshake_channel
+        (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot;
+          &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id
+          &quot;id-cmc-senderNonce&quot; server_sender_nonce
+          &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates
+          (privk certification_authority))))
+    (non-orig shared_secret (privk end_entity))
+    (uniq-orig sender_nonce)
+    (inputs handshake_channel end_entity certification_authority
+      shared_secret (pubk certification_authority) req_sequence
+      cert_req_id subject_name subject_key_identifier (pubk end_entity)
+      (privk end_entity))
+    (outputs issued_certificates)
+    (comment
+      &quot;Concrete signing-certificate enrollment exchange from Appendix B.1. The RFC provides no CPSA-native MAC operator; the hash of the shared-secret and request sequence models the keyed Identity Proof witness without nesting an encryption term inside a hash.&quot;))
+  (defrole certification_authority
+    (vars (end_entity certification_authority name)
+      (handshake_channel chan) (shared_secret skey)
+      (req_sequence cert_req_id subject_name issued_certificates data)
+      (subject_key_identifier sender_nonce server_sender_nonce text))
+    (trace
+      (recv handshake_channel
+        (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence
+          &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence)
+          &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id
+          &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot;
+          (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot;
+          subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot;
+          (privk end_entity)))
+      (send handshake_channel
+        (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot;
+          &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id
+          &quot;id-cmc-senderNonce&quot; server_sender_nonce
+          &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates
+          (privk certification_authority))))
+    (non-orig shared_secret (privk certification_authority))
+    (uniq-orig issued_certificates server_sender_nonce)
+    (inputs handshake_channel end_entity certification_authority
+      shared_secret (pubk end_entity) req_sequence cert_req_id
+      subject_name subject_key_identifier sender_nonce
+      (privk certification_authority))
+    (outputs server_sender_nonce issued_certificates)
+    (comment
+      &quot;Concrete signing-certificate enrollment exchange from Appendix B.1. The RFC provides no CPSA-native MAC operator; the hash of the shared-secret and request sequence models the keyed Identity Proof witness without nesting an encryption term inside a hash.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k0">Item <a href="#t0">0</a>, Children: <a href="#k2">2</a> <a href="#k3">3</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle style='fill: red;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity) (certification_authority certification_authority) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>end_entity</text>
+   </g>
+  <text x='39.960' y='39.960' style='text-anchor: middle;'>CMC 0</text>
+  </svg></div>
+
+<pre>(defskeleton CMC
+  (vars (req_sequence cert_req_id subject_name issued_certificates data)
+    (shared_secret skey)
+    (subject_key_identifier sender_nonce server_sender_nonce text)
+    (end_entity certification_authority name) (handshake_channel chan))
+  (defstrand end_entity 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel))
+  (non-orig shared_secret (privk end_entity)
+    (privk certification_authority))
+  (uniq-orig sender_nonce)
+  (comment
+    &quot;Role-level freshness declarations govern the Sender Nonce; the skeleton does not repeat them.&quot;)
+  (label 0)
+  (unrealized (0 1))
+  (maps
+    ((0)
+      ((end_entity end_entity)
+        (certification_authority certification_authority)
+        (handshake_channel handshake_channel)
+        (shared_secret shared_secret) (req_sequence req_sequence)
+        (cert_req_id cert_req_id) (subject_name subject_name)
+        (issued_certificates issued_certificates)
+        (subject_key_identifier subject_key_identifier)
+        (sender_nonce sender_nonce)
+        (server_sender_nonce server_sender_nonce))))
+  (origs (sender_nonce (0 0)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k2">Item <a href="#t0">2</a>, Parent: <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name-0 &quot;CertTemplate.publicKey&quot; (pubk end_entity-0) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier-0 &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity-0)))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name-0) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier-0) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity-0) (certification_authority certification_authority) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>certification_authority</text></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity) (certification_authority certification_authority) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>end_entity</text>
+   </g>
+  <text x='89.940' y='39.960' style='text-anchor: middle;'>CMC 2</text>
+  </svg></div>
+
+<pre>(defskeleton CMC
+  (vars
+    (req_sequence cert_req_id subject_name issued_certificates
+      subject_name-0 data) (shared_secret skey)
+    (subject_key_identifier sender_nonce server_sender_nonce
+      subject_key_identifier-0 text)
+    (end_entity certification_authority end_entity-0 name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand end_entity 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel))
+  (defstrand certification_authority 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name-0)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier-0)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity-0)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel-0))
+  (precedes ((0 0) (1 0)) ((1 1) (0 1)))
+  (non-orig shared_secret (privk end_entity)
+    (privk certification_authority))
+  (uniq-orig issued_certificates sender_nonce server_sender_nonce)
+  (comment
+    &quot;Role-level freshness declarations govern the Sender Nonce; the skeleton does not repeat them.&quot;)
+  (operation encryption-test (displaced 2 0 end_entity 1)
+    (hash shared_secret-0 req_sequence-0) (1 0))
+  (strand-map 0 1)
+  (label 2)
+  (parent 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((end_entity end_entity)
+        (certification_authority certification_authority)
+        (handshake_channel handshake_channel)
+        (shared_secret shared_secret) (req_sequence req_sequence)
+        (cert_req_id cert_req_id) (subject_name subject_name)
+        (issued_certificates issued_certificates)
+        (subject_key_identifier subject_key_identifier)
+        (sender_nonce sender_nonce)
+        (server_sender_nonce server_sender_nonce))))
+  (origs (sender_nonce (0 0)) (server_sender_nonce (1 1))
+    (issued_certificates (1 1))))</pre>
+
+<p id="k3">Item <a href="#t0">3</a>, Parent: <a href="#k0">0</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='279.840pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 279.840 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='239.880' y1='114.960' x2='239.880' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 239.880 114.960 Q 192.900 114.960 145.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-1 (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence-0 &quot;id-cmc-identityProof&quot; (hash shared_secret-0 req_sequence-0) &quot;id-cmc-senderNonce&quot; sender_nonce-0 &quot;crm&quot; cert_req_id-0 &quot;CertTemplate.subject&quot; subject_name-1 &quot;CertTemplate.publicKey&quot; (pubk end_entity-1) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier-1 &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity-1)))</title>
+   <circle cx='239.880' cy='114.960' r='6.000'/></g>
+  <path
+   d='M 139.920 189.960 Q 92.940 189.960 45.960 189.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle cx='139.920' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence-0 &quot;id-cmc-identityProof&quot; (hash shared_secret-0 req_sequence-0) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name-0 &quot;CertTemplate.publicKey&quot; (pubk end_entity-0) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier-0 &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity-0)))</title>
+   <circle style='fill: blue;' cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='189.960' r='6.000'/></g>
+  <path
+   d='M 39.960 114.960 Q 86.940 114.960 133.920 114.960'
+   style='stroke-dasharray: 6.000,2.400; stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((req_sequence req_sequence-0) (cert_req_id cert_req_id-0) (subject_name subject_name-1) (shared_secret shared_secret-0) (subject_key_identifier subject_key_identifier-1) (sender_nonce sender_nonce-0) (end_entity end_entity-1) (handshake_channel handshake_channel-1))</title>
+   <text
+    x='239.880' y='77.460'
+    style='text-anchor: middle;'>end_entity</text></g>
+  <g>
+   <title>((req_sequence req_sequence-0) (cert_req_id cert_req_id) (subject_name subject_name-0) (issued_certificates issued_certificates) (shared_secret shared_secret-0) (subject_key_identifier subject_key_identifier-0) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity-0) (certification_authority certification_authority) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>certification_authority</text></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity) (certification_authority certification_authority) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460' style='text-anchor: middle;'>end_entity</text>
+   </g>
+  <text x='139.920' y='39.960' style='text-anchor: middle;'>CMC 3</text>
+  </svg></div>
+
+<pre>(defskeleton CMC
+  (vars
+    (req_sequence cert_req_id subject_name issued_certificates
+      req_sequence-0 subject_name-0 cert_req_id-0 subject_name-1 data)
+    (shared_secret shared_secret-0 skey)
+    (subject_key_identifier sender_nonce server_sender_nonce
+      subject_key_identifier-0 subject_key_identifier-1 sender_nonce-0
+      text)
+    (end_entity certification_authority end_entity-0 end_entity-1 name)
+    (handshake_channel handshake_channel-0 handshake_channel-1 chan))
+  (defstrand end_entity 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel))
+  (defstrand certification_authority 2 (req_sequence req_sequence-0)
+    (cert_req_id cert_req_id) (subject_name subject_name-0)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret-0)
+    (subject_key_identifier subject_key_identifier-0)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity-0)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel-0))
+  (defstrand end_entity 1 (req_sequence req_sequence-0)
+    (cert_req_id cert_req_id-0) (subject_name subject_name-1)
+    (shared_secret shared_secret-0)
+    (subject_key_identifier subject_key_identifier-1)
+    (sender_nonce sender_nonce-0) (end_entity end_entity-1)
+    (handshake_channel handshake_channel-1))
+  (precedes ((0 0) (1 0)) ((1 1) (0 1)) ((2 0) (1 0)))
+  (non-orig shared_secret shared_secret-0 (privk end_entity)
+    (privk certification_authority) (privk end_entity-1))
+  (uniq-orig issued_certificates sender_nonce server_sender_nonce
+    sender_nonce-0)
+  (comment
+    &quot;Role-level freshness declarations govern the Sender Nonce; the skeleton does not repeat them.&quot;)
+  (operation encryption-test (added-strand end_entity 1)
+    (hash shared_secret-0 req_sequence-0) (1 0))
+  (strand-map 0 1)
+  (label 3)
+  (parent 0)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((end_entity end_entity)
+        (certification_authority certification_authority)
+        (handshake_channel handshake_channel)
+        (shared_secret shared_secret) (req_sequence req_sequence)
+        (cert_req_id cert_req_id) (subject_name subject_name)
+        (issued_certificates issued_certificates)
+        (subject_key_identifier subject_key_identifier)
+        (sender_nonce sender_nonce)
+        (server_sender_nonce server_sender_nonce))))
+  (origs (sender_nonce-0 (2 0)) (server_sender_nonce (1 1))
+    (issued_certificates (1 1)) (sender_nonce (0 0))))</pre>
+
+<p id="t4">Tree <a href="#top">4</a>, POV <a href="#k4">4</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='129.840pt' height='79.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 129.840 79.920' font-size='12.000'>
+  <text
+   x='89.880' y='26.040'
+   style='font-weight: bold; text-anchor: middle; fill: blue;'
+   onclick='window.open(&quot;#k5&quot;, &quot;_self&quot;)'>5</text>
+  <line
+   x1='39.960' y1='39.960' x2='89.880' y2='39.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <text
+   x='39.960' y='26.040' style='text-anchor: middle; fill: black;'
+   onclick='window.open(&quot;#k4&quot;, &quot;_self&quot;)'>4</text>
+  </svg></div>
+
+<pre>(defprotocol CMC basic
+  (defrole end_entity
+    (vars (end_entity certification_authority name)
+      (handshake_channel chan) (shared_secret skey)
+      (req_sequence cert_req_id subject_name issued_certificates data)
+      (subject_key_identifier sender_nonce server_sender_nonce text))
+    (trace
+      (send handshake_channel
+        (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence
+          &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence)
+          &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id
+          &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot;
+          (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot;
+          subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot;
+          (privk end_entity)))
+      (recv handshake_channel
+        (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot;
+          &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id
+          &quot;id-cmc-senderNonce&quot; server_sender_nonce
+          &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates
+          (privk certification_authority))))
+    (non-orig shared_secret (privk end_entity))
+    (uniq-orig sender_nonce)
+    (inputs handshake_channel end_entity certification_authority
+      shared_secret (pubk certification_authority) req_sequence
+      cert_req_id subject_name subject_key_identifier (pubk end_entity)
+      (privk end_entity))
+    (outputs issued_certificates)
+    (comment
+      &quot;Concrete signing-certificate enrollment exchange from Appendix B.1. The RFC provides no CPSA-native MAC operator; the hash of the shared-secret and request sequence models the keyed Identity Proof witness without nesting an encryption term inside a hash.&quot;))
+  (defrole certification_authority
+    (vars (end_entity certification_authority name)
+      (handshake_channel chan) (shared_secret skey)
+      (req_sequence cert_req_id subject_name issued_certificates data)
+      (subject_key_identifier sender_nonce server_sender_nonce text))
+    (trace
+      (recv handshake_channel
+        (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence
+          &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence)
+          &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id
+          &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot;
+          (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot;
+          subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot;
+          (privk end_entity)))
+      (send handshake_channel
+        (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot;
+          &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id
+          &quot;id-cmc-senderNonce&quot; server_sender_nonce
+          &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates
+          (privk certification_authority))))
+    (non-orig shared_secret (privk certification_authority))
+    (uniq-orig issued_certificates server_sender_nonce)
+    (inputs handshake_channel end_entity certification_authority
+      shared_secret (pubk end_entity) req_sequence cert_req_id
+      subject_name subject_key_identifier sender_nonce
+      (privk certification_authority))
+    (outputs server_sender_nonce issued_certificates)
+    (comment
+      &quot;Concrete signing-certificate enrollment exchange from Appendix B.1. The RFC provides no CPSA-native MAC operator; the hash of the shared-secret and request sequence models the keyed Identity Proof witness without nesting an encryption term inside a hash.&quot;))
+  (defgenrule neqRl_indx
+    (forall ((x indx)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_strd
+    (forall ((x strd)) (implies (fact neq x x) (false))))
+  (defgenrule neqRl_mesg
+    (forall ((x mesg)) (implies (fact neq x x) (false)))))</pre>
+
+<p id="k4">Item <a href="#t4">4</a>, Child: <a href="#k5">5</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='79.920pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 79.920 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle style='fill: red;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity) (certification_authority certification_authority) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>certification_authority</text></g>
+  <text x='39.960' y='39.960' style='text-anchor: middle;'>CMC 4</text>
+  </svg></div>
+
+<pre>(defskeleton CMC
+  (vars (req_sequence cert_req_id subject_name issued_certificates data)
+    (shared_secret skey)
+    (subject_key_identifier sender_nonce server_sender_nonce text)
+    (end_entity certification_authority name) (handshake_channel chan))
+  (defstrand certification_authority 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel))
+  (non-orig shared_secret (privk end_entity)
+    (privk certification_authority))
+  (uniq-orig issued_certificates server_sender_nonce)
+  (comment
+    &quot;Role-level freshness declarations govern the server Sender Nonce; the skeleton does not repeat them.&quot;)
+  (label 4)
+  (unrealized (0 0))
+  (maps
+    ((0)
+      ((end_entity end_entity)
+        (certification_authority certification_authority)
+        (handshake_channel handshake_channel)
+        (shared_secret shared_secret) (req_sequence req_sequence)
+        (cert_req_id cert_req_id) (subject_name subject_name)
+        (issued_certificates issued_certificates)
+        (subject_key_identifier subject_key_identifier)
+        (sender_nonce sender_nonce)
+        (server_sender_nonce server_sender_nonce))))
+  (origs (issued_certificates (0 1)) (server_sender_nonce (0 1)))
+  (comment &quot;1 in cohort - 1 not yet seen&quot;))</pre>
+
+<p id="k5">Item <a href="#t4">5</a>, Parent: <a href="#k4">4</a>.</p>
+
+<div>
+ <svg
+  class='diagram' width='179.880pt' height='229.920pt'
+  xmlns='http://www.w3.org/2000/svg' version='1.1'
+  viewBox='0 0 179.880 229.920' font-size='12.000'>
+  <defs>
+   <marker
+    id='arrow' orient='auto' markerWidth='5' markerHeight='10' refX='5'
+    refY='5'>
+    <path
+     d='M 0 0 5 5 0 10'
+     style='stroke-width: 2; fill: none; stroke: black;'/></marker>
+   </defs>
+  <line
+   x1='139.920' y1='114.960' x2='139.920' y2='114.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <line
+   x1='39.960' y1='114.960' x2='39.960' y2='189.960'
+   style='stroke-width: 0.960; stroke: gray;'/>
+  <path
+   d='M 139.920 114.960 Q 92.940 114.960 45.960 114.960'
+   style='stroke-width: 0.960; stroke: black; marker-end: url(#arrow); fill: none;'/>
+  <g>
+   <title>(ch-msg handshake_channel-0 (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle cx='139.920' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_RESPONSE&quot; &quot;id-cct-PKIResponse&quot; &quot;id-cmc-statusInfoV2&quot; &quot;success&quot; cert_req_id &quot;id-cmc-senderNonce&quot; server_sender_nonce &quot;id-cmc-recipientNonce&quot; sender_nonce issued_certificates (privk certification_authority)))</title>
+   <circle cx='39.960' cy='189.960' r='6.000'/></g>
+  <g>
+   <title>(ch-msg handshake_channel (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence) &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot; (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot; subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot; (privk end_entity)))</title>
+   <circle style='fill: blue;' cx='39.960' cy='114.960' r='6.000'/></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (end_entity end_entity) (handshake_channel handshake_channel-0))</title>
+   <text
+    x='139.920' y='77.460'
+    style='text-anchor: middle;'>end_entity</text></g>
+  <g>
+   <title>((req_sequence req_sequence) (cert_req_id cert_req_id) (subject_name subject_name) (issued_certificates issued_certificates) (shared_secret shared_secret) (subject_key_identifier subject_key_identifier) (sender_nonce sender_nonce) (server_sender_nonce server_sender_nonce) (end_entity end_entity) (certification_authority certification_authority) (handshake_channel handshake_channel))</title>
+   <text
+    x='39.960' y='77.460'
+    style='text-anchor: middle;'>certification_authority</text></g>
+  <text x='89.940' y='39.960' style='text-anchor: middle;'>CMC 5</text>
+  </svg></div>
+
+<pre>(defskeleton CMC
+  (vars (req_sequence cert_req_id subject_name issued_certificates data)
+    (shared_secret skey)
+    (subject_key_identifier sender_nonce server_sender_nonce text)
+    (end_entity certification_authority name)
+    (handshake_channel handshake_channel-0 chan))
+  (defstrand certification_authority 2 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (issued_certificates issued_certificates)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce)
+    (server_sender_nonce server_sender_nonce) (end_entity end_entity)
+    (certification_authority certification_authority)
+    (handshake_channel handshake_channel))
+  (defstrand end_entity 1 (req_sequence req_sequence)
+    (cert_req_id cert_req_id) (subject_name subject_name)
+    (shared_secret shared_secret)
+    (subject_key_identifier subject_key_identifier)
+    (sender_nonce sender_nonce) (end_entity end_entity)
+    (handshake_channel handshake_channel-0))
+  (precedes ((1 0) (0 0)))
+  (non-orig shared_secret (privk end_entity)
+    (privk certification_authority))
+  (uniq-orig issued_certificates sender_nonce server_sender_nonce)
+  (comment
+    &quot;Role-level freshness declarations govern the server Sender Nonce; the skeleton does not repeat them.&quot;)
+  (operation encryption-test (added-strand end_entity 1)
+    (enc &quot;CMC_PKI_REQUEST&quot; &quot;id-cct-PKIData&quot; req_sequence
+      &quot;id-cmc-identityProof&quot; (hash shared_secret req_sequence)
+      &quot;id-cmc-senderNonce&quot; sender_nonce &quot;crm&quot; cert_req_id
+      &quot;CertTemplate.subject&quot; subject_name &quot;CertTemplate.publicKey&quot;
+      (pubk end_entity) &quot;id-ce-subjectKeyIdentifier&quot;
+      subject_key_identifier &quot;id-ce-keyUsage&quot; &quot;digitalSignature&quot;
+      (privk end_entity)) (0 0))
+  (strand-map 0)
+  (label 5)
+  (parent 4)
+  (realized)
+  (shape)
+  (maps
+    ((0)
+      ((end_entity end_entity)
+        (certification_authority certification_authority)
+        (handshake_channel handshake_channel)
+        (shared_secret shared_secret) (req_sequence req_sequence)
+        (cert_req_id cert_req_id) (subject_name subject_name)
+        (issued_certificates issued_certificates)
+        (subject_key_identifier subject_key_identifier)
+        (sender_nonce sender_nonce)
+        (server_sender_nonce server_sender_nonce))))
+  (origs (sender_nonce (1 0)) (issued_certificates (0 1))
+    (server_sender_nonce (0 1))))</pre>
+
+</body>
+</html>
